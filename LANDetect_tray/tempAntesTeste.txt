@@ -1,0 +1,104 @@
+#include <iostream>
+#include <Windows.h>
+#include <shellapi.h>
+#include <conio.h>
+
+using namespace std;
+
+// colocar acoes de checagem constante do ping no void (usando threads)
+// ex: void xxxxx() {xxxxx}
+// se for fazer a verificacao do windscribe em si, fazer um branch especificamente pro windscribe e implementar a funcionalidade
+// depois implementar possibilidade de trocar o ip a ser pingado (por um arquivo de cfg, editado por um gui, se possivel)
+
+void hideConsoleWindow() {
+	::ShowWindow(::GetConsoleWindow(), SW_HIDE);
+}
+
+void showConsoleWindow() {
+	::ShowWindow(::GetConsoleWindow(), SW_SHOW);
+}
+
+#define ID_TRAY_ICON 1
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_CREATE:
+    {
+        // Criar o ícone na barra de notificações
+        NOTIFYICONDATA nid = { 0 };
+        nid.cbSize = sizeof(NOTIFYICONDATA);
+        nid.hWnd = hwnd;
+        nid.uID = ID_TRAY_ICON;
+        nid.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
+        nid.uCallbackMessage = WM_USER + 1;
+        nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+        lstrcpy(nid.szTip, TEXT("Meu ícone de notificação"));
+        Shell_NotifyIcon(NIM_ADD, &nid);
+        break;
+    }
+    case WM_DESTROY:
+    {
+        // Remover o ícone na barra de notificações
+        NOTIFYICONDATA nid = { 0 };
+        nid.cbSize = sizeof(NOTIFYICONDATA);
+        nid.hWnd = hwnd;
+        nid.uID = ID_TRAY_ICON;
+        Shell_NotifyIcon(NIM_DELETE, &nid);
+
+        // Encerrar a aplicação
+        PostQuitMessage(0);
+        break;
+    }
+    case WM_USER + 1:
+    {
+        // Lidar com eventos de clique no ícone
+        if (lParam == WM_LBUTTONUP)
+        {
+            MessageBox(hwnd, TEXT("Ícone de notificação clicado!"), TEXT("Mensagem"), MB_ICONINFORMATION);
+        }
+        break;
+    }
+    default:
+        return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+    return 0;
+}
+
+int main() {
+	//hideConsoleWindow();
+
+    WNDCLASS wc = { 0 };
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = GetModuleHandle(NULL);
+    wc.lpszClassName = TEXT("TrayIconClass");
+    RegisterClass(&wc);
+    HWND hwnd = CreateWindowEx(0, TEXT("TrayIconClass"), TEXT(""), 0, 0, 0, 0, 0, NULL, NULL, GetModuleHandle(NULL), NULL);
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+	string userip;
+	cout << "insira o ip a ser testado: ";
+	cin >> userip;
+
+	string iptest = "ping ";
+	iptest = iptest + userip + " -n 1";
+	char* char_iptest = &iptest[0];
+	int ping = (system(char_iptest));
+	// result 0 if sucess | result 1 if fail //
+
+	system("cls");
+	if (ping == 0)
+		cout << "a lan esta ativada para o ip " << userip << endl;
+	if (ping == 1)
+		cout << "a lan esta desativada levando em conta o ip " << userip << endl;
+	if (ping != 1 && ping != 0)
+		cout << "resultado desconhecido...\n";
+	system("pause");
+
+	return 1;
+}

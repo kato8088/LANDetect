@@ -1,0 +1,113 @@
+CODIGO CHATBCT :DDDDD
+
+#include <windows.h>
+
+// ID para o ícone na barra de notificações
+#define ID_TRAY_ICON 1
+
+// Procedimento de janela
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_CREATE:
+    {
+        // Criar o ícone na barra de notificações
+        NOTIFYICONDATA nid = { 0 };
+        nid.cbSize = sizeof(NOTIFYICONDATA);
+        nid.hWnd = hwnd;
+        nid.uID = ID_TRAY_ICON;
+        nid.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
+        nid.uCallbackMessage = WM_USER + 1;
+        nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+        lstrcpy(nid.szTip, TEXT("Meu ícone de notificação"));
+        Shell_NotifyIcon(NIM_ADD, &nid);
+        break;
+    }
+    case WM_DESTROY:
+    {
+        // Remover o ícone na barra de notificações
+        NOTIFYICONDATA nid = { 0 };
+        nid.cbSize = sizeof(NOTIFYICONDATA);
+        nid.hWnd = hwnd;
+        nid.uID = ID_TRAY_ICON;
+        Shell_NotifyIcon(NIM_DELETE, &nid);
+
+        // Encerrar a aplicação
+        PostQuitMessage(0);
+        break;
+    }
+    case WM_USER + 1:
+    {
+        // Lidar com eventos de clique no ícone
+        if (lParam == WM_LBUTTONUP)
+        {
+            MessageBox(hwnd, TEXT("Ícone de notificação clicado!"), TEXT("Mensagem"), MB_ICONINFORMATION);
+        }
+        break;
+    }
+    default:
+        return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+    return 0;
+}
+
+int main()
+{
+    // Registrar a classe da janela
+    WNDCLASS wc = { 0 };
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = GetModuleHandle(NULL);
+    wc.lpszClassName = TEXT("TrayIconClass");
+    RegisterClass(&wc);
+
+    // Criar a janela (não visível)
+    HWND hwnd = CreateWindowEx(0, TEXT("TrayIconClass"), TEXT(""), 0, 0, 0, 0, 0, NULL, NULL, GetModuleHandle(NULL), NULL);
+
+    // Rodar o loop de mensagens
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+CODIGO MERDA ABAIXO KKKKKKKKK
+#include <windows.h>
+#include <iostream>
+#include <conio.h>
+
+using namespace std;
+
+int main()
+{
+	NOTIFYICONDATAA nid = {};
+	AllocConsole();
+	HWND h = FindWindowA("ConsoleWindowClass", NULL); //GetStdHandle(STD_OUTPUT_HANDLE);
+	
+	nid.cbSize = sizeof(nid);
+	nid.hWnd = h;
+	nid.uFlags = NIF_ICON | NIF_TIP | NIF_INFO;
+	
+	nid.hIcon = (HICON)LoadImage(NULL, "D:\\STUFF\\trees.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_SHARED);
+	memcpy(nid.szTip, "MY TOOLTIP\nIS HELPFUL!", 128);
+	memcpy(nid.szInfoTitle, "Say Anything!\nHello", 64);
+	memcpy(nid.szInfo, "This is a balloon,\nwhich is awesome!", 256);
+	//nid.dwInfoFlags =
+	
+	Shell_NotifyIcon(NIM_ADD, &nid);
+	getch();
+	Shell_NotifyIcon(NIM_DELETE, &nid);
+}

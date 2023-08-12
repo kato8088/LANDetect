@@ -1,10 +1,12 @@
 #include <iostream>
 #include <Windows.h>
 #include "resource.h"
+#include <thread>
+
 
 using namespace std;
 
-// colocar acoes de checagem do ping no void (em threads)
+// DONE! colocar acoes de checagem do ping no void (em threads)
 // depois implementar possibilidade de trocar o ip a ser pingado (por um arquivo de cfg, editado por um gui, se possivel)
 
 void hideConsoleWindow() {
@@ -15,47 +17,82 @@ void showConsoleWindow() {
 	::ShowWindow(::GetConsoleWindow(), SW_SHOW);
 }
 
-int main() {
-	//hideConsoleWindow();
+string userip;
+string iptest;
+char* char_iptest;
+int ping;
+bool running = true;
 
-	NOTIFYICONDATAA nid = {};
+/*
+int pingThread() {
+	ping = 0;
+	ping = (system(char_iptest));
+	cout << "AAAAAAAAAAAAAAAAAA";
+	return 2;
+}
+*/
+
+#define WM_TRAYICON (WM_USER + 1)
+#define TIMER_ID 1
+#define TIMER_INTERVAL 10000  // Intervalo em milissegundos (10 segundo no exemplo)
+
+NOTIFYICONDATAA nid = {};
+HWND hwnd;
+
+int main() {
+
+	// hideConsoleWindow();
+
+	// NOTIFYICONDATAA nid = {}; (declarado globalmente)
 	AllocConsole();
 	HWND h = FindWindowA("ConsoleWindowClass", NULL);
-
 	nid.cbSize = sizeof(nid);
 	nid.hWnd = h;
-	nid.uFlags = NIF_ICON;
+	nid.uID = 1;
+	nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+	nid.uCallbackMessage = WM_TRAYICON;
 
-	string userip;
-	cout << "insira o ip a ser testado: ";
-	cin >> userip;
-	string iptest = "ping ";
+	//thread pingLoop(pingThread);
+
+	// temporario enquanto nao tem o sistema de leitura de registro!
+	userip = "192.168.15.1";
+//	userip = "0.0.0.0";
+	iptest = "ping ";
 	iptest = iptest + userip + " -n 1";
-	char* char_iptest = &iptest[0];
-	int ping = (system(char_iptest));
-	// result 0 if sucess | result 1 if fail //
-	system("cls");
-	if (ping == 0) {
-		cout << "a lan esta ativada para o ip " << userip << endl;
-		// (antigo funcionando com arquivo local) nid.hIcon = (HICON)LoadImageA(NULL, "lan_icon_on.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_SHARED);
-		nid.hIcon = (HICON)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
-	}
-	if (ping == 1) {
-		cout << "a lan esta desativada levando em conta o ip " << userip << endl;
-		// (antigo funcionando com arquivo local) nid.hIcon = (HICON)LoadImageA(NULL, "lan_icon_on.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_SHARED);
-		nid.hIcon = (HICON)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON2));
-	}
+	char_iptest = &iptest[0];
+	// temp end
 
-	Shell_NotifyIconA(NIM_ADD, &nid);
+	string trayTip1 = "LANDetect - LAN Ativada para o IP " + userip + "!";
+	string trayTip0 = "LANDetect - LAN Desativada para o IP " + userip + "!";
 
-	if (ping != 1 && ping != 0)
-		cout << "resultado desconhecido...\n";
+	// while (running = true) {
+	 while(true) {
+		Shell_NotifyIconA(NIM_ADD, &nid);
 
-	system("pause");
+	//	pingLoop.join();
 
-	Shell_NotifyIconA(NIM_DELETE, &nid);
+		ping = 0;
+		ping = (system(char_iptest));
 
-	// on click: deletar o icone e ai fechar a aplicacao (ver de clicar com o click direito)
-
-	return 1;
+		if (ping == 0) {
+			// lan ativada
+			cout << "a lan esta ativada para o ip " << userip << endl;
+			nid.hIcon = (HICON)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+			lstrcpyA(nid.szTip, trayTip1.c_str());
+			Shell_NotifyIconA(NIM_MODIFY, &nid);
+		}
+		if (ping == 1) {
+			// lan desativada
+			nid.hIcon = (HICON)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON2));
+			lstrcpyA(nid.szTip, trayTip0.c_str());
+			Shell_NotifyIconA(NIM_MODIFY, &nid);
+		}
+	// nim modify funcionando 100% :DDDD
+	// sleep em ms!
+	//	Sleep(900000);
+	// debug abaixo!
+	
+		Sleep(5000);
+	 }
+	return 0;
 }

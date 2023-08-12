@@ -142,8 +142,8 @@
     <ResourceCompile Include="LANDetect_tray1.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\Downloads\lan_icon_off.ico" />
-    <Image Include="..\..\..\..\Downloads\lan_icon_on.ico" />
+    <Image Include="icons\lan_icon_off.ico" />
+    <Image Include="icons\lan_icon_on.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

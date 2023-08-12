@@ -1,3 +1,63 @@
+NOVO CODIGO CHAT BOCET :)
+
+#include <Windows.h>
+
+#define WM_TRAYICON (WM_USER + 1)
+
+NOTIFYICONDATA nid;
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    switch (uMsg) {
+        case WM_TRAYICON:
+            if (LOWORD(lParam) == WM_LBUTTONUP) {
+                // Lidar com o clique esquerdo no ícone da barra de notificações aqui
+                MessageBox(NULL, L"Ícone da barra de notificações clicado!", L"Click Detected", MB_ICONINFORMATION);
+            }
+            break;
+        default:
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+    return 0;
+}
+
+int main() {
+    // Configurar a estrutura NOTIFYICONDATA
+    nid.cbSize = sizeof(nid);
+    nid.hWnd = NULL; // Preencher com o HWND da janela principal, se necessário
+    nid.uID = 1;
+    nid.uFlags = NIF_ICON | NIF_MESSAGE;
+    nid.uCallbackMessage = WM_TRAYICON;
+    nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+
+    // Adicionar o ícone à bandeja do sistema
+    Shell_NotifyIcon(NIM_ADD, &nid);
+
+    // Criar uma janela oculta para receber mensagens de notificação
+    WNDCLASS wc = {};
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = GetModuleHandle(NULL);
+    wc.lpszClassName = L"TrayWindowClass";
+    RegisterClass(&wc);
+
+    HWND hwnd = CreateWindow(wc.lpszClassName, L"TrayWindow", 0, 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
+
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    // Remover o ícone da bandeja do sistema ao sair
+    Shell_NotifyIcon(NIM_DELETE, &nid);
+
+    return 0;
+}
+
+
+
+
+
+
 CODIGO CHATBCT :DDDDD
 
 #include <windows.h>

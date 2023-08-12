@@ -38,10 +38,10 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\Downloads\lan_icon_on.ico">
+    <Image Include="icons\lan_icon_off.ico">
       <Filter>Arquivos de Recurso</Filter>
     </Image>
-    <Image Include="..\..\..\..\Downloads\lan_icon_off.ico">
+    <Image Include="icons\lan_icon_on.ico">
       <Filter>Arquivos de Recurso</Filter>
     </Image>
   </ItemGroup>
